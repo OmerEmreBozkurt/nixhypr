@@ -49,7 +49,7 @@ Transforms a minimal NixOS installation into a complete Hyprland desktop with:
 ### 1. Download and Run
 ```bash
 # Download the script
-curl -O https://raw.githubusercontent.com/YOUR_USERNAME/nixos-hyprland-setup/main/postinstall_nixos_hyprland.sh
+curl -O https://raw.githubusercontent.com/OmerEmreBozkurt/nixhypr/main/postinstall_nixos_hyprland.sh
 
 # Make it executable
 chmod +x postinstall_nixos_hyprland.sh
@@ -264,8 +264,8 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/YOUR_USERNAME/nixos-hyprland-setup/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/YOUR_USERNAME/nixos-hyprland-setup/discussions)
+- **Issues**: [GitHub Issues](https://github.com/OmerEmreBozkurt/nixhypr/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/OmerEmreBozkurt/nixhypr/discussions)
 - **NixOS Discourse**: [NixOS Community](https://discourse.nixos.org/)
 
 ---
