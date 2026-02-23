@@ -585,7 +585,7 @@ EOF
         cp "${config_file}.pre-hyprland" "$config_file"
         print_warning "Backup restored. Please check your configuration manually."
         rm -f /tmp/nixos-syntax-error.log
-        return 1
+        return 1  # non-fatal: caller decides whether to stop
     fi
     
     print_status "Configuration validated successfully. Rebuilding system..."
@@ -713,9 +713,12 @@ EOF
 setup_ollama() {
     print_header "Ollama Setup"
     
-    # Start Ollama service
-    systemctl enable ollama
-    systemctl start ollama
+    # Start Ollama service (skip gracefully if not installed yet)
+    if ! systemctl enable ollama 2>/dev/null; then
+        print_warning "Ollama service not found. Skipping Ollama setup."
+        return 0
+    fi
+    systemctl start ollama || true
     
     print_status "Ollama service enabled and started âœ“"
     
@@ -726,8 +729,8 @@ setup_ollama() {
     if systemctl is-active --quiet ollama; then
         print_status "Ollama is running âœ“"
     else
-        print_error "Failed to start Ollama service"
-        return
+        print_warning "Ollama service did not start. Skipping model preload."
+        return 0
     fi
     
     # Prompt for model preloading
@@ -904,33 +907,55 @@ finalize_setup() {
     done
 }
 
+# Helper: run an optional step; on failure print a warning and continue
+run_optional() {
+    local step_name="$1"
+    local func="$2"
+    shift 2
+    if ! "$func" "$@"; then
+        print_warning "Optional step '$step_name' failed or was skipped. Continuing..."
+    fi
+}
+
 # Main execution
 main() {
     print_header "NixOS Hyprland Post-Installation Setup"
     echo "This script will configure your NixOS system with Hyprland desktop environment."
     echo ""
-    
-    # Run all setup functions
+
+    # --- Required steps (failures stop the script) ---
     check_nixos
     check_root
     get_username
-    setup_home_manager
-    get_dotfiles
-    clone_dotfiles
-    setup_config_files
+
+    # --- Optional steps (failures print a warning and continue) ---
+    run_optional "Home Manager setup"      setup_home_manager
+    run_optional "Dotfiles input"          get_dotfiles
+    run_optional "Dotfiles clone"          clone_dotfiles
+    run_optional "Config files setup"      setup_config_files
+
+    # Config method selection is needed for install; keep required
     choose_config_method
-    
+
+    # Package installation is required
     if [[ "$CONFIG_METHOD" == "system" ]]; then
         install_system_packages
     else
-        setup_home_manager_config
+        run_optional "Home Manager config" setup_home_manager_config
+        # Fall back to system packages if Home Manager config failed
+        if [[ "${HM_FAILED:-false}" == "true" ]]; then
+            print_warning "Home Manager config failed - falling back to system-level install"
+            CONFIG_METHOD="system"
+            install_system_packages
+        fi
     fi
-    
-    setup_ollama
-    setup_fish
-    setup_extra_drives
+
+    run_optional "Ollama setup"            setup_ollama
+    run_optional "Fish shell setup"        setup_fish
+    run_optional "Extra drives setup"      setup_extra_drives
+
     finalize_setup
 }
 
 # Run main function
-main "$@" 
+main "$@"
