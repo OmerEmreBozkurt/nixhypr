@@ -1,4 +1,4 @@
-#!/bin/bash
+﻿#!/bin/bash
 
 # NixOS Post-Installation Setup Script for Hyprland
 # This script configures a fresh NixOS installation with Hyprland desktop environment
@@ -90,8 +90,8 @@ check_nixos() {
         fi
     fi
     
-    print_status "NixOS detected ✓"
-    print_status "System requirements check passed ✓"
+    print_status "NixOS detected âœ“"
+    print_status "System requirements check passed âœ“"
 }
 
 # Function to check for root privileges
@@ -101,7 +101,7 @@ check_root() {
         exit 1
     fi
     
-    print_status "Root privileges confirmed ✓"
+    print_status "Root privileges confirmed âœ“"
 }
 
 # Function to prompt for username
@@ -116,7 +116,7 @@ get_username() {
         fi
         
         if id "$USERNAME" &>/dev/null; then
-            print_status "User '$USERNAME' found ✓"
+            print_status "User '$USERNAME' found âœ“"
             break
         else
             print_warning "User '$USERNAME' not found. Please create the user first or enter a valid username."
@@ -134,7 +134,7 @@ setup_home_manager() {
     print_header "Home Manager Setup"
     
     if sudo -u "$USERNAME" command -v home-manager &>/dev/null; then
-        print_status "Home Manager is already installed ✓"
+        print_status "Home Manager is already installed âœ“"
         USE_HOME_MANAGER=true
         return
     fi
@@ -160,10 +160,10 @@ setup_home_manager() {
                 # Prioritize latest stable releases
                 if [[ "$nixos_version" == "24.11" ]]; then
                     nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.11.tar.gz home-manager
-                    print_status "Using Home Manager 24.11 (latest stable) ✓"
+                    print_status "Using Home Manager 24.11 (latest stable) âœ“"
                 elif [[ "$nixos_version" == "24.05" ]]; then
                     nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
-                    print_status "Using Home Manager 24.05 ✓"
+                    print_status "Using Home Manager 24.05 âœ“"
                 elif [[ "$nixos_version" == "25.05" ]]; then
                     print_warning "NixOS 25.05 detected - Home Manager has known compatibility issues"
                     print_warning "Using system-level configuration instead for better reliability"
@@ -174,11 +174,11 @@ setup_home_manager() {
                     # For future stable releases, try to match or use latest
                     nix-channel --add https://github.com/nix-community/home-manager/archive/release-${nixos_version}.tar.gz home-manager 2>/dev/null || \
                     nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
-                    print_status "Using Home Manager for NixOS $nixos_version ✓"
+                    print_status "Using Home Manager for NixOS $nixos_version âœ“"
                 else
                     # Fallback to master for unstable or very new versions
                     nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
-                    print_status "Using Home Manager master branch ✓"
+                    print_status "Using Home Manager master branch âœ“"
                 fi
                 
                 nix-channel --update
@@ -187,7 +187,7 @@ setup_home_manager() {
                 sudo -u "$USERNAME" nix-shell '<home-manager>' -A install
                 
                 USE_HOME_MANAGER=true
-                print_status "Home Manager installed successfully ✓"
+                print_status "Home Manager installed successfully âœ“"
                 break
                 ;;
             [Nn]*)
@@ -287,7 +287,7 @@ clone_dotfiles() {
         
         print_status "Cloning dotfiles from $DOTFILES_REPO..."
         sudo -u "$USERNAME" git clone "$DOTFILES_REPO" "$DOTFILES_PATH"
-        print_status "Dotfiles cloned successfully ✓"
+        print_status "Dotfiles cloned successfully âœ“"
     fi
 }
 
@@ -333,16 +333,16 @@ setup_config_files() {
             read -p "Create symlink (recommended) or copy files for $dir? (Y/n): " link_method
             if [[ "$link_method" =~ ^[Nn]$ ]]; then
                 sudo -u "$USERNAME" cp -r "$DOTFILES_PATH/$dir" "$target_dir"
-                print_status "Copied $dir configuration ✓"
+                print_status "Copied $dir configuration âœ“"
             else
                 # Create parent directory first and set proper permissions
                 sudo -u "$USERNAME" mkdir -p "$(dirname "$target_dir")"
                 if sudo -u "$USERNAME" ln -sf "$DOTFILES_PATH/$dir" "$target_dir"; then
-                    print_status "Created symlink for $dir configuration ✓"
+                    print_status "Created symlink for $dir configuration âœ“"
                 else
                     print_warning "Failed to create symlink, copying files instead..."
                     sudo -u "$USERNAME" cp -r "$DOTFILES_PATH/$dir" "$target_dir"
-                    print_status "Copied $dir configuration ✓"
+                    print_status "Copied $dir configuration âœ“"
                 fi
             fi
         fi
@@ -358,7 +358,7 @@ setup_config_files() {
             
             # Make scripts executable and symlink them
             find "$DOTFILES_PATH/scripts" -type f -executable -exec sudo -u "$USERNAME" ln -sf {} "$scripts_target/" \;
-            print_status "Set up scripts in ~/.local/bin ✓"
+            print_status "Set up scripts in ~/.local/bin âœ“"
         fi
     fi
 }
@@ -414,7 +414,7 @@ install_system_packages() {
         
         # Intel/AMD graphics work well with Hyprland out of the box
         if echo "$gpu_info" | grep -qi "intel\|amd"; then
-            print_status "Intel/AMD graphics detected - excellent Hyprland compatibility ✓"
+            print_status "Intel/AMD graphics detected - excellent Hyprland compatibility âœ“"
         else
             print_warning "Unknown graphics hardware detected"
             print_warning "Intel and AMD graphics work best with Hyprland"
@@ -608,7 +608,7 @@ EOF
         exit 1
     fi
     
-    print_status "System packages installed successfully ✓"
+    print_status "System packages installed successfully âœ“"
     
     # Clean up
     rm -f /tmp/update-config.nix
@@ -692,7 +692,7 @@ EOF
     # Apply Home Manager configuration
     print_status "Applying Home Manager configuration..."
     if sudo -u "$USERNAME" home-manager switch 2>/tmp/hm-switch-error.log; then
-        print_status "Home Manager configuration applied successfully ✓"
+        print_status "Home Manager configuration applied successfully âœ“"
     else
         print_error "Home Manager configuration failed!"
         print_error "Error details:"
@@ -717,14 +717,14 @@ setup_ollama() {
     systemctl enable ollama
     systemctl start ollama
     
-    print_status "Ollama service enabled and started ✓"
+    print_status "Ollama service enabled and started âœ“"
     
     # Wait a moment for service to start
     sleep 3
     
     # Check if Ollama is running
     if systemctl is-active --quiet ollama; then
-        print_status "Ollama is running ✓"
+        print_status "Ollama is running âœ“"
     else
         print_error "Failed to start Ollama service"
         return
@@ -753,7 +753,7 @@ setup_ollama() {
         done
     fi
     
-    print_status "Ollama setup completed ✓"
+    print_status "Ollama setup completed âœ“"
 }
 
 # Function to setup Fish shell
@@ -761,7 +761,7 @@ setup_fish() {
     print_header "Fish Shell Setup"
     
     # Fish shell is already set in the configuration.nix, no need for chsh
-    print_status "Fish shell configured in system configuration ✓"
+    print_status "Fish shell configured in system configuration âœ“"
     
     # Create basic Fish configuration if it doesn't exist
     fish_config="/home/$USERNAME/.config/fish/config.fish"
@@ -785,7 +785,7 @@ echo "Welcome to Fish shell on NixOS!"
 echo "Run 'neofetch' to see system info"
 EOF
         chown "$USERNAME:$(id -gn $USERNAME)" "$fish_config"
-        print_status "Created basic Fish configuration ✓"
+        print_status "Created basic Fish configuration âœ“"
     fi
 }
 
@@ -858,18 +858,18 @@ setup_extra_drives() {
 finalize_setup() {
     print_header "Setup Complete"
     
-    echo "🎉 NixOS Hyprland setup is complete!"
+    echo "ðŸŽ‰ NixOS Hyprland setup is complete!"
     echo ""
     echo "What was configured:"
-    echo "  ✓ Hyprland desktop environment"
-    echo "  ✓ Waybar status bar"
-    echo "  ✓ Fuzzel application launcher"
-    echo "  ✓ Fish shell (set as default)"
-    echo "  ✓ Ollama AI service"
-    echo "  ✓ Matugen theming tool"
-    echo "  ✓ Terminal emulators (foot, kitty)"
-    echo "  ✓ Dotfiles configuration (if provided)"
-    echo "  ✓ Extra drive mounting (if configured)"
+    echo "  âœ“ Hyprland desktop environment"
+    echo "  âœ“ Waybar status bar"
+    echo "  âœ“ Fuzzel application launcher"
+    echo "  âœ“ Fish shell (set as default)"
+    echo "  âœ“ Ollama AI service"
+    echo "  âœ“ Matugen theming tool"
+    echo "  âœ“ Terminal emulators (foot, kitty)"
+    echo "  âœ“ Dotfiles configuration (if provided)"
+    echo "  âœ“ Extra drive mounting (if configured)"
     echo ""
     echo "Next steps:"
     echo "  1. Log out of your current session"
